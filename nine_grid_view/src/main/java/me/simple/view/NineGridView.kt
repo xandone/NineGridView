@@ -90,6 +90,7 @@ open class NineGridView @JvmOverloads constructor(
 
             typedArray.recycle()
         }
+
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -262,7 +263,8 @@ open class NineGridView @JvmOverloads constructor(
 
         when (childCount) {
             1 -> {
-                layoutSingleItem()
+//                layoutSingleItem()
+                layoutTwoItem()
             }
 
             2 -> {
@@ -288,6 +290,8 @@ open class NineGridView @JvmOverloads constructor(
 //        performBind()
     }
 
+    var isReversal = true
+
     //布局item
     private fun layoutItem(skipLinePosition: Int) {
         var left = 0
@@ -296,20 +300,41 @@ open class NineGridView @JvmOverloads constructor(
         var bottom = 0
 
         val itemCount = getDisplayCount()
-        for (i in 0 until itemCount) {
-            val itemView = getChildAt(i)
-            right = left + itemView.measuredWidth
-            bottom = top + itemView.measuredHeight
+        if (isReversal) {
+            val tempView = getChildAt(0)
+            left = tempView.measuredWidth * 2
+            for (i in itemCount - 1 downTo 0) {
+                Log.d("hfghfg", "itemCount=$itemCount,i=$i")
+                val itemView = getChildAt(i)
+                right = left + itemView.measuredWidth
+                bottom = top + itemView.measuredHeight
+                itemView.layout(left, top, right, bottom)
 
-            itemView.layout(left, top, right, bottom)
+                if ((i + 1) % skipLinePosition == 0) {//换行
+                    left = tempView.measuredWidth * 2
+                    top = bottom + itemGap
+                } else {
+                    left = left - tempView.measuredWidth + itemGap
+                }
+            }
 
-            if ((i + 1) % skipLinePosition == 0) {//换行
-                left = 0
-                top = bottom + itemGap
-            } else {
-                left = right + itemGap
+        } else {
+            for (i in 0 until itemCount) {
+                val itemView = getChildAt(i)
+                right = left + itemView.measuredWidth
+                bottom = top + itemView.measuredHeight
+
+                itemView.layout(left, top, right, bottom)
+
+                if ((i + 1) % skipLinePosition == 0) {//换行
+                    left = 0
+                    top = bottom + itemGap
+                } else {
+                    left = right + itemGap
+                }
             }
         }
+
     }
 
     //布局一个item的情况
